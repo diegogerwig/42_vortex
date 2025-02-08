@@ -1,0 +1,7 @@
+mne     # Magnetoencephalography and Electroencephalography
+numpy==2.0.2
+pandas==2.2.3
+matplotlib==3.9.4
+seaborn==0.13.2
+colorama==0.4.4
+scikit-learn 
