@@ -58,7 +58,7 @@ def run_project(config):
 
     python_bin = f"{config['env_path']}/bin/python"
     commands = [
-        (f"{python_bin} ./src/split.py", '📂 Splitting dataset\n'),
+        # (f"{python_bin} ./src/split.py", '📂 Splitting dataset\n'),
     ]
 
     for cmd, msg in commands:
