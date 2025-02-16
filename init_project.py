@@ -5,7 +5,6 @@ import subprocess
 import time
 from pathlib import Path
 
-
 def get_config():
     home = os.environ['HOME']
     conda_path = f"{home}/sgoinfre/miniforge"
