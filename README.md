@@ -30,3 +30,7 @@ The goal of the CSP algorithm is to find spatial filters that maximize the varia
 ### ICA (Independent Component Analysis)
 
 Independent Component Analysis (ICA) is a statistical and computational technique used to separate a multivariate signal into its constituent independent subcomponents. It's particularly useful when the observed signals are a linear mixture of various independent sources, making it a powerful tool in signal processing, neuroscience, image processing, and other fields.
+
+## EEG info
+
+[MNE Tutorial in Python](https://www.youtube.com/watch?v=lEUmgSFQaAY)
