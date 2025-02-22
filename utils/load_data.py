@@ -3,7 +3,7 @@ import mne
 
 os.environ["MNE_SKIP_NETWORK_TESTS"] = "1"  # Disable requests to confirm download
 
-def load_data(subjects, runs, data_dir="../data/files/"):
+def load_data(subjects, runs, data_dir="../data/raw/files/"):
     """
     Load EEG data for given subjects and runs.
     """
