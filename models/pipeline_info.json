@@ -1,0 +1,38 @@
+{
+    "pipeline_params": {
+        "pca_n_components": 13.0,
+        "n_components_selected": 13,
+        "explained_variance_ratio": [
+            0.272810181764933,
+            0.1297618536579386,
+            0.08201149926931946,
+            0.07221350925278072,
+            0.06237905177024682,
+            0.06072196344482831,
+            0.04963721638043668,
+            0.04914003997792084,
+            0.044115666621941996,
+            0.04146413843729015,
+            0.039153848554231686,
+            0.03448223475962579,
+            0.03251793588491591
+        ],
+        "classifier_params": {
+            "C": 1.0,
+            "break_ties": false,
+            "cache_size": 200,
+            "class_weight": null,
+            "coef0": 0.0,
+            "decision_function_shape": "ovr",
+            "degree": 3,
+            "gamma": "scale",
+            "kernel": "rbf",
+            "max_iter": -1,
+            "probability": false,
+            "random_state": null,
+            "shrinking": true,
+            "tol": 0.001,
+            "verbose": false
+        }
+    }
+}

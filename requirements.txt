@@ -1,0 +1,13 @@
+# 📌 Data Science & Data Analysis
+numpy==2.0.2          # Numerical computing and multi-dimensional arrays
+pandas==2.2.3         # Data manipulation and analysis (DataFrames and Series)
+
+# 📊 Data Visualization
+matplotlib==3.9.4     # 2D plotting and visualization
+seaborn==0.13.2       # Statistical data visualization (built on Matplotlib)
+
+# 🧠 Signal Processing & Neuroscience
+mne==1.9.0            # EEG/MEG signal processing and analysis (Magnetoencephalography and Electroencephalography)
+
+# 🤖 Machine Learning
+scikit-learn==1.6.1   # Machine learning algorithms and tools

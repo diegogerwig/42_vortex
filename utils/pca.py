@@ -6,7 +6,7 @@ from typing import Tuple, Optional, Dict
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 
-def setup_logging() -> logging.Logger:
+def setup_logging():
     """Configure logging for the analysis."""
     logger = logging.getLogger('pca_analysis')
     logger.setLevel(logging.INFO)
@@ -17,16 +17,9 @@ def setup_logging() -> logging.Logger:
         logger.addHandler(handler)
     return logger
 
-def preprocess_data(data: np.ndarray, logger: logging.Logger) -> np.ndarray:
+def preprocess_data(data, logger):
     """
     Preprocess the EEG data by standardizing and handling missing values.
-    
-    Args:
-        data: Raw EEG data array of shape (n_channels, n_samples)
-        logger: Logger instance
-    
-    Returns:
-        Standardized data array
     """
     logger.info("Starting data preprocessing...")
     
@@ -46,16 +39,9 @@ def preprocess_data(data: np.ndarray, logger: logging.Logger) -> np.ndarray:
     logger.info("Data preprocessing completed.")
     return standardized_data
 
-def compute_pca(data: np.ndarray, logger: logging.Logger) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+def compute_pca(data, logger):
     """
     Compute PCA on the preprocessed data.
-    
-    Args:
-        data: Preprocessed data array
-        logger: Logger instance
-    
-    Returns:
-        Tuple containing eigenvalues, eigenvectors, explained variance ratio, and cumulative variance
     """
     logger.info("Computing PCA...")
     
@@ -77,54 +63,24 @@ def compute_pca(data: np.ndarray, logger: logging.Logger) -> Tuple[np.ndarray, n
     logger.info("PCA computation completed.")
     return eigenvalues, eigenvectors, explained_variance_ratio, cumulative_variance
 
-def find_optimal_components(cumulative_variance: np.ndarray, 
-                          threshold: float = 98.0,
-                          logger: logging.Logger = None) -> int:
+def find_optimal_components(cumulative_variance, threshold, logger):
     """
     Find optimal number of components based on explained variance threshold.
-    
-    Args:
-        cumulative_variance: Array of cumulative explained variance
-        threshold: Minimum cumulative variance to explain (default: 95%)
-        logger: Logger instance
-    
-    Returns:
-        Optimal number of components
     """
     optimal_components = np.argmax(cumulative_variance >= threshold) + 1
     if logger:
         logger.info(f"Optimal components for {threshold}% variance: {optimal_components}")
     return optimal_components
 
-def transform_data(data: np.ndarray, 
-                  eigenvectors: np.ndarray, 
-                  n_components: int) -> np.ndarray:
+def transform_data(data: np.ndarray, eigenvectors, n_components):
     """
     Transform data using selected principal components.
-    
-    Args:
-        data: Preprocessed data array
-        eigenvectors: Matrix of eigenvectors
-        n_components: Number of components to use
-        
-    Returns:
-        Transformed data array
     """
     return np.dot(eigenvectors[:, :n_components].T, data)
 
-def create_components_dataframe(eigenvalues: np.ndarray, 
-                              explained_variance_ratio: np.ndarray,
-                              cumulative_variance: np.ndarray) -> pd.DataFrame:
+def create_components_dataframe(eigenvalues, explained_variance_ratio, cumulative_variance):
     """
     Create a DataFrame with PCA component information.
-    
-    Args:
-        eigenvalues: Array of eigenvalues
-        explained_variance_ratio: Array of explained variance ratios
-        cumulative_variance: Array of cumulative variance
-        
-    Returns:
-        DataFrame with component information
     """
     return pd.DataFrame({
         'Component': range(1, len(eigenvalues) + 1),
@@ -133,23 +89,17 @@ def create_components_dataframe(eigenvalues: np.ndarray,
         'Cumulative_Variance(%)': cumulative_variance
     })
 
-def plot_pca_results(explained_variance_ratio: np.ndarray,
-                    cumulative_variance: np.ndarray,
-                    transformed_data: np.ndarray,
-                    eigenvectors: np.ndarray,
-                    max_components: Optional[int] = None) -> None:
+def plot_pca_results(explained_variance_ratio,
+                    cumulative_variance,
+                    transformed_data,
+                    eigenvectors,
+                    n_components,
+                    max_components: Optional[int] = None):
     """
     Create visualization plots for PCA results.
-    
-    Args:
-        explained_variance_ratio: Array of explained variance ratios
-        cumulative_variance: Array of cumulative variance
-        transformed_data: Transformed data array
-        eigenvectors: Matrix of eigenvectors
-        max_components: Maximum number of components to plot
     """
     if max_components is None:
-        max_components = min(10, len(explained_variance_ratio))
+        max_components = n_components
     
     fig, axes = plt.subplots(2, 2, figsize=(15, 12))
     
@@ -196,22 +146,15 @@ def plot_pca_results(explained_variance_ratio: np.ndarray,
     plt.tight_layout()
     plt.show()
 
-def analyze_eeg_pca(raw_data: np.ndarray, variance_threshold: float = 98.0) -> Dict:
+def analyze_eeg_pca(pca_data, variance_threshold):
     """
     Main function to perform PCA analysis on EEG data.
-    
-    Args:
-        raw_data: Raw EEG data array
-        variance_threshold: Threshold for explained variance
-    
-    Returns:
-        Dictionary containing analysis results
     """
     # Setup logging
     logger = setup_logging()
     
     # Preprocess data
-    standardized_data = preprocess_data(raw_data, logger)
+    standardized_data = preprocess_data(pca_data, logger)
     
     # Compute PCA
     eigenvalues, eigenvectors, explained_variance_ratio, cumulative_variance = compute_pca(
@@ -244,7 +187,8 @@ def analyze_eeg_pca(raw_data: np.ndarray, variance_threshold: float = 98.0) -> D
         explained_variance_ratio,
         cumulative_variance,
         transformed_data,
-        eigenvectors
+        eigenvectors, 
+        n_components
     )
     
     return {
