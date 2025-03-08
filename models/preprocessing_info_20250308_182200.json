@@ -1,4 +1,8 @@
 {
+    "subject": "27",
+    "run": 12,
+    "task_type": "motor_imagery",
+    "paradigm": "left_right_hand",
     "channels": [
         "FC5",
         "FC3",
@@ -67,18 +71,15 @@
     ],
     "sampling_frequency": 160.0,
     "data_shape": {
-        "epochs": 90,
-        "channels": 64,
-        "time_points": 801
+        "epochs": 29,
+        "features": 51264
     },
     "preprocessing_parameters": {
-        "filter_low": 8,
-        "filter_high": 40,
-        "notch_frequencies": 60,
+        "filter_low": 8.0,
+        "filter_high": 40.0,
         "scaling": "StandardScaler"
     },
     "metadata": {
-        "creation_date": "2025-03-08 17:43:47",
-        "raw_data_info": "<Info | 9 non-empty values\n bads: []\n ch_names: FC5, FC3, FC1, FCz, FC2, FC4, FC6, C5, C3, C1, Cz, C2, C4, C6, ...\n chs: 64 EEG\n custom_ref_applied: False\n dig: 67 items (3 Cardinal, 64 EEG)\n highpass: 8.0 Hz\n lowpass: 40.0 Hz\n meas_date: 2009-08-12 16:15:00 UTC\n nchan: 64\n projs: []\n sfreq: 160.0 Hz\n subject_info: <subject_info | his_id: X, sex: 0, last_name: X>\n>"
+        "creation_date": "2025-03-08 18:22:00"
     }
 }
