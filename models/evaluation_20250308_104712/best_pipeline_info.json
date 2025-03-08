@@ -1,0 +1,9 @@
+{
+    "best_pipeline_name": "PCA_MLP",
+    "best_score": 0.9783783783783784,
+    "best_metric": "accuracy",
+    "timestamp": "20250308_104712",
+    "pipeline_path": "../models/evaluation_20250308_104712/best_pipeline.joblib",
+    "is_csp": false,
+    "is_ensemble": false
+}

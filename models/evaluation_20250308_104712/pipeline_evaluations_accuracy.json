@@ -1,0 +1,46 @@
+{
+    "PCA_SVM": {
+        "best_params": {
+            "classifier__C": 10,
+            "classifier__gamma": "scale",
+            "dimension_reduction__n_components": 0.95
+        },
+        "best_score": 0.9672672672672673,
+        "is_csp": false
+    },
+    "PCA_RF": {
+        "best_params": {
+            "classifier__max_depth": null,
+            "classifier__n_estimators": 100,
+            "dimension_reduction__n_components": 0.99
+        },
+        "best_score": 0.961861861861862,
+        "is_csp": false
+    },
+    "PCA_MLP": {
+        "best_params": {
+            "classifier__alpha": 0.0001,
+            "classifier__hidden_layer_sizes": [
+                100
+            ],
+            "dimension_reduction__n_components": 0.95
+        },
+        "best_score": 0.9783783783783784,
+        "is_csp": false
+    },
+    "SMOTE_PCA_RF": {
+        "best_params": {
+            "classifier__max_depth": 20,
+            "classifier__n_estimators": 100,
+            "dimension_reduction__n_components": 0.9,
+            "sampling__k_neighbors": 5
+        },
+        "best_score": 0.9564564564564565,
+        "is_csp": false
+    },
+    "Mixed_Ensemble": {
+        "best_params": {},
+        "best_score": 0.8807807807807808,
+        "is_csp": true
+    }
+}

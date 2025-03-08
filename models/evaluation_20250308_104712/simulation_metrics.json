@@ -1,0 +1,9 @@
+{
+    "accuracy": 1.0,
+    "f1": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "avg_prediction_time": 0.021726775169372558,
+    "max_prediction_time": 0.039862632751464844,
+    "min_prediction_time": 0.017439842224121094
+}
