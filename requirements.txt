@@ -1,14 +1,14 @@
 # 📌 Data Science & Data Analysis
-numpy==1.24.4          # Numerical computing and multi-dimensional arrays
-pandas==2.2.3         # Data manipulation and analysis (DataFrames and Series)
+numpy==1.26.4             # Numerical computing and multi-dimensional arrays
+pandas==2.2.3             # Data manipulation and analysis (DataFrames and Series)
 
 # 📊 Data Visualization
-matplotlib==3.9.4     # 2D plotting and visualization
-seaborn==0.13.2       # Statistical data visualization (built on Matplotlib)
+matplotlib==3.9.4         # 2D plotting and visualization
+seaborn==0.13.2           # Statistical data visualization (built on Matplotlib)
 
 # 🧠 Signal Processing & Neuroscience
-mne==1.9.0            # EEG/MEG signal processing and analysis (Magnetoencephalography and Electroencephalography)
+mne==1.9.0                # EEG/MEG signal processing and analysis (Magnetoencephalography and Electroencephalography)
 
 # 🤖 Machine Learning
-scikit-learn==1.3.2   # Machine learning algorithms and tools
-imbalanced-learn==0.11.0  # Class imbalance learning algorithms
+scikit-learn==1.4.0       # Machine learning algorithms and tools
+imbalanced-learn==0.12.0  # Class imbalance learning algorithms
