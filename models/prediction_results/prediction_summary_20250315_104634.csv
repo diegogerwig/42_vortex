@@ -1,0 +1,6 @@
+subject_id,experiment_group,run_id,accuracy,f1_score,task_type,paradigm
+66,motor_imagery_left_right,12,0.4482758620689655,0.4541238152853398,motor_imagery,left_right_hand
+82,motor_imagery_hands_feet,14,0.20689655172413793,0.14874915483434753,motor_imagery,hands_feet
+91,motor_imagery_left_right,8,0.5517241379310345,0.43448275862068964,motor_imagery,left_right_hand
+45,motor_imagery_hands_feet,6,0.4827586206896552,0.46212963899282034,motor_imagery,hands_feet
+42,motor_imagery_left_right,4,0.27586206896551724,0.23769100169779286,motor_imagery,left_right_hand

@@ -1,0 +1,709 @@
+{
+    "timestamp": "20250315_104634",
+    "num_subjects": 6,
+    "selected_subjects": [
+        66,
+        82,
+        91,
+        100,
+        45,
+        42
+    ],
+    "avg_accuracy": 0.3931034482758621,
+    "avg_f1_score": 0.347435273886198,
+    "results": {
+        "subject_66": {
+            "subject_id": 66,
+            "experiment_group": "motor_imagery_left_right",
+            "run_id": 12,
+            "task_type": "motor_imagery",
+            "paradigm": "left_right_hand",
+            "accuracy": 0.4482758620689655,
+            "f1_score": 0.4541238152853398,
+            "confusion_matrix": [
+                [
+                    5,
+                    4,
+                    5
+                ],
+                [
+                    2,
+                    4,
+                    1
+                ],
+                [
+                    0,
+                    4,
+                    4
+                ]
+            ],
+            "classification_report": {
+                "rest": {
+                    "precision": 0.7142857142857143,
+                    "recall": 0.35714285714285715,
+                    "f1-score": 0.47619047619047616,
+                    "support": 14.0
+                },
+                "left_hand": {
+                    "precision": 0.3333333333333333,
+                    "recall": 0.5714285714285714,
+                    "f1-score": 0.42105263157894735,
+                    "support": 7.0
+                },
+                "right_hand": {
+                    "precision": 0.4,
+                    "recall": 0.5,
+                    "f1-score": 0.4444444444444444,
+                    "support": 8.0
+                },
+                "accuracy": 0.4482758620689655,
+                "macro avg": {
+                    "precision": 0.4825396825396826,
+                    "recall": 0.4761904761904762,
+                    "f1-score": 0.44722918407128925,
+                    "support": 29.0
+                },
+                "weighted avg": {
+                    "precision": 0.5356321839080459,
+                    "recall": 0.4482758620689655,
+                    "f1-score": 0.4541238152853398,
+                    "support": 29.0
+                }
+            },
+            "predict_time": 1.72445,
+            "y_true": [
+                2,
+                1,
+                3,
+                1,
+                2,
+                1,
+                3,
+                1,
+                2,
+                1,
+                3,
+                1,
+                3,
+                1,
+                2,
+                1,
+                2,
+                1,
+                3,
+                1,
+                3,
+                1,
+                2,
+                1,
+                2,
+                1,
+                3,
+                1,
+                3
+            ],
+            "y_pred": [
+                2,
+                1,
+                2,
+                1,
+                2,
+                2,
+                2,
+                3,
+                2,
+                1,
+                2,
+                3,
+                3,
+                2,
+                2,
+                2,
+                3,
+                1,
+                3,
+                1,
+                3,
+                3,
+                1,
+                2,
+                1,
+                3,
+                3,
+                3,
+                2
+            ],
+            "class_mapping": {
+                "1": "rest",
+                "2": "left_hand",
+                "3": "right_hand"
+            }
+        },
+        "subject_82": {
+            "subject_id": 82,
+            "experiment_group": "motor_imagery_hands_feet",
+            "run_id": 14,
+            "task_type": "motor_imagery",
+            "paradigm": "hands_feet",
+            "accuracy": 0.20689655172413793,
+            "f1_score": 0.14874915483434753,
+            "confusion_matrix": [
+                [
+                    0,
+                    8,
+                    6
+                ],
+                [
+                    2,
+                    4,
+                    2
+                ],
+                [
+                    1,
+                    4,
+                    2
+                ]
+            ],
+            "classification_report": {
+                "rest": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 14.0
+                },
+                "both_hands": {
+                    "precision": 0.25,
+                    "recall": 0.5,
+                    "f1-score": 0.3333333333333333,
+                    "support": 8.0
+                },
+                "both_feet": {
+                    "precision": 0.2,
+                    "recall": 0.2857142857142857,
+                    "f1-score": 0.23529411764705882,
+                    "support": 7.0
+                },
+                "accuracy": 0.20689655172413793,
+                "macro avg": {
+                    "precision": 0.15,
+                    "recall": 0.2619047619047619,
+                    "f1-score": 0.1895424836601307,
+                    "support": 29.0
+                },
+                "weighted avg": {
+                    "precision": 0.11724137931034484,
+                    "recall": 0.20689655172413793,
+                    "f1-score": 0.14874915483434753,
+                    "support": 29.0
+                }
+            },
+            "predict_time": 1.507587,
+            "y_true": [
+                3,
+                1,
+                2,
+                1,
+                2,
+                1,
+                3,
+                1,
+                2,
+                1,
+                3,
+                1,
+                3,
+                1,
+                2,
+                1,
+                3,
+                1,
+                2,
+                1,
+                3,
+                1,
+                2,
+                1,
+                2,
+                1,
+                3,
+                1,
+                2
+            ],
+            "y_pred": [
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                3,
+                2,
+                1,
+                3,
+                3,
+                2,
+                2,
+                2,
+                3,
+                2,
+                2,
+                3,
+                3,
+                3,
+                2,
+                3,
+                2,
+                2,
+                2,
+                3,
+                1,
+                3,
+                1
+            ],
+            "class_mapping": {
+                "1": "rest",
+                "2": "both_hands",
+                "3": "both_feet"
+            }
+        },
+        "subject_91": {
+            "subject_id": 91,
+            "experiment_group": "motor_imagery_left_right",
+            "run_id": 8,
+            "task_type": "motor_imagery",
+            "paradigm": "left_right_hand",
+            "accuracy": 0.5517241379310345,
+            "f1_score": 0.43448275862068964,
+            "confusion_matrix": [
+                [
+                    14,
+                    0,
+                    0
+                ],
+                [
+                    5,
+                    2,
+                    0
+                ],
+                [
+                    7,
+                    1,
+                    0
+                ]
+            ],
+            "classification_report": {
+                "rest": {
+                    "precision": 0.5384615384615384,
+                    "recall": 1.0,
+                    "f1-score": 0.7,
+                    "support": 14.0
+                },
+                "left_hand": {
+                    "precision": 0.6666666666666666,
+                    "recall": 0.2857142857142857,
+                    "f1-score": 0.4,
+                    "support": 7.0
+                },
+                "right_hand": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 8.0
+                },
+                "accuracy": 0.5517241379310345,
+                "macro avg": {
+                    "precision": 0.40170940170940167,
+                    "recall": 0.42857142857142855,
+                    "f1-score": 0.3666666666666667,
+                    "support": 29.0
+                },
+                "weighted avg": {
+                    "precision": 0.42086648983200703,
+                    "recall": 0.5517241379310345,
+                    "f1-score": 0.43448275862068964,
+                    "support": 29.0
+                }
+            },
+            "predict_time": 1.462987,
+            "y_true": [
+                2,
+                1,
+                3,
+                1,
+                3,
+                1,
+                2,
+                1,
+                2,
+                1,
+                3,
+                1,
+                3,
+                1,
+                2,
+                1,
+                2,
+                1,
+                3,
+                1,
+                3,
+                1,
+                2,
+                1,
+                3,
+                1,
+                2,
+                1,
+                3
+            ],
+            "y_pred": [
+                2,
+                1,
+                1,
+                1,
+                2,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                2,
+                1,
+                1
+            ],
+            "class_mapping": {
+                "1": "rest",
+                "2": "left_hand",
+                "3": "right_hand"
+            }
+        },
+        "subject_100": {
+            "error": "X has 41024 features, but StandardScaler is expecting 51264 features as input."
+        },
+        "subject_45": {
+            "subject_id": 45,
+            "experiment_group": "motor_imagery_hands_feet",
+            "run_id": 6,
+            "task_type": "motor_imagery",
+            "paradigm": "hands_feet",
+            "accuracy": 0.4827586206896552,
+            "f1_score": 0.46212963899282034,
+            "confusion_matrix": [
+                [
+                    9,
+                    3,
+                    2
+                ],
+                [
+                    3,
+                    4,
+                    1
+                ],
+                [
+                    5,
+                    1,
+                    1
+                ]
+            ],
+            "classification_report": {
+                "rest": {
+                    "precision": 0.5294117647058824,
+                    "recall": 0.6428571428571429,
+                    "f1-score": 0.5806451612903226,
+                    "support": 14.0
+                },
+                "both_hands": {
+                    "precision": 0.5,
+                    "recall": 0.5,
+                    "f1-score": 0.5,
+                    "support": 8.0
+                },
+                "both_feet": {
+                    "precision": 0.25,
+                    "recall": 0.14285714285714285,
+                    "f1-score": 0.18181818181818182,
+                    "support": 7.0
+                },
+                "accuracy": 0.4827586206896552,
+                "macro avg": {
+                    "precision": 0.4264705882352941,
+                    "recall": 0.42857142857142855,
+                    "f1-score": 0.4208211143695015,
+                    "support": 29.0
+                },
+                "weighted avg": {
+                    "precision": 0.4538539553752536,
+                    "recall": 0.4827586206896552,
+                    "f1-score": 0.46212963899282034,
+                    "support": 29.0
+                }
+            },
+            "predict_time": 1.488537,
+            "y_true": [
+                3,
+                1,
+                2,
+                1,
+                2,
+                1,
+                3,
+                1,
+                2,
+                1,
+                3,
+                1,
+                2,
+                1,
+                3,
+                1,
+                2,
+                1,
+                3,
+                1,
+                2,
+                1,
+                3,
+                1,
+                3,
+                1,
+                2,
+                1,
+                2
+            ],
+            "y_pred": [
+                1,
+                1,
+                3,
+                1,
+                1,
+                3,
+                1,
+                1,
+                2,
+                2,
+                1,
+                2,
+                2,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                3,
+                2,
+                1,
+                2,
+                1,
+                3,
+                2,
+                1,
+                1,
+                2
+            ],
+            "class_mapping": {
+                "1": "rest",
+                "2": "both_hands",
+                "3": "both_feet"
+            }
+        },
+        "subject_42": {
+            "subject_id": 42,
+            "experiment_group": "motor_imagery_left_right",
+            "run_id": 4,
+            "task_type": "motor_imagery",
+            "paradigm": "left_right_hand",
+            "accuracy": 0.27586206896551724,
+            "f1_score": 0.23769100169779286,
+            "confusion_matrix": [
+                [
+                    6,
+                    8,
+                    0
+                ],
+                [
+                    5,
+                    2,
+                    0
+                ],
+                [
+                    6,
+                    2,
+                    0
+                ]
+            ],
+            "classification_report": {
+                "rest": {
+                    "precision": 0.35294117647058826,
+                    "recall": 0.42857142857142855,
+                    "f1-score": 0.3870967741935484,
+                    "support": 14.0
+                },
+                "left_hand": {
+                    "precision": 0.16666666666666666,
+                    "recall": 0.2857142857142857,
+                    "f1-score": 0.21052631578947367,
+                    "support": 7.0
+                },
+                "right_hand": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 8.0
+                },
+                "accuracy": 0.27586206896551724,
+                "macro avg": {
+                    "precision": 0.173202614379085,
+                    "recall": 0.23809523809523805,
+                    "f1-score": 0.19920769666100735,
+                    "support": 29.0
+                },
+                "weighted avg": {
+                    "precision": 0.2106152805949966,
+                    "recall": 0.27586206896551724,
+                    "f1-score": 0.23769100169779286,
+                    "support": 29.0
+                }
+            },
+            "predict_time": 2.056598,
+            "y_true": [
+                2,
+                1,
+                3,
+                1,
+                2,
+                1,
+                3,
+                1,
+                2,
+                1,
+                3,
+                1,
+                2,
+                1,
+                3,
+                1,
+                2,
+                1,
+                3,
+                1,
+                3,
+                1,
+                2,
+                1,
+                2,
+                1,
+                3,
+                1,
+                3
+            ],
+            "y_pred": [
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                2,
+                1,
+                2,
+                2,
+                2,
+                1,
+                1,
+                2,
+                1,
+                2,
+                1,
+                2,
+                1,
+                2,
+                1,
+                2,
+                1,
+                2,
+                2,
+                2,
+                1
+            ],
+            "class_mapping": {
+                "1": "rest",
+                "2": "left_hand",
+                "3": "right_hand"
+            }
+        }
+    },
+    "model_info": {
+        "timestamp": "2025-03-15 10:36:17",
+        "pipeline_config": "freq_rf",
+        "cv_accuracy": 0.5076923076923077,
+        "cv_accuracy_std": 0.0715425970682241,
+        "subjects": [
+            41,
+            41,
+            41,
+            27,
+            27,
+            27,
+            18,
+            18,
+            18
+        ],
+        "paradigms": [
+            "left_right_hand",
+            "left_right_hand",
+            "left_right_hand",
+            "left_right_hand",
+            "left_right_hand",
+            "left_right_hand",
+            "left_right_hand",
+            "left_right_hand",
+            "left_right_hand"
+        ],
+        "task_types": [
+            "motor_imagery",
+            "motor_imagery",
+            "motor_imagery",
+            "motor_imagery",
+            "motor_imagery",
+            "motor_imagery",
+            "motor_imagery",
+            "motor_imagery",
+            "motor_imagery"
+        ],
+        "classes": [
+            "1",
+            "2",
+            "3"
+        ],
+        "class_distribution": {
+            "1": 126,
+            "2": 68,
+            "3": 66
+        },
+        "feature_shape": [
+            260,
+            51264
+        ],
+        "training_time": 13.686346,
+        "model_file": "../models/eeg_model_motor_imagery_left_right_20250315_103457.joblib"
+    }
+}

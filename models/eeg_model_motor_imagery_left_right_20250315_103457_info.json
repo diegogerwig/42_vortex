@@ -1,0 +1,55 @@
+{
+    "timestamp": "2025-03-15 10:36:17",
+    "pipeline_config": "freq_rf",
+    "cv_accuracy": 0.5076923076923077,
+    "cv_accuracy_std": 0.0715425970682241,
+    "subjects": [
+        41,
+        41,
+        41,
+        27,
+        27,
+        27,
+        18,
+        18,
+        18
+    ],
+    "paradigms": [
+        "left_right_hand",
+        "left_right_hand",
+        "left_right_hand",
+        "left_right_hand",
+        "left_right_hand",
+        "left_right_hand",
+        "left_right_hand",
+        "left_right_hand",
+        "left_right_hand"
+    ],
+    "task_types": [
+        "motor_imagery",
+        "motor_imagery",
+        "motor_imagery",
+        "motor_imagery",
+        "motor_imagery",
+        "motor_imagery",
+        "motor_imagery",
+        "motor_imagery",
+        "motor_imagery"
+    ],
+    "classes": [
+        "1",
+        "2",
+        "3"
+    ],
+    "class_distribution": {
+        "1": 126,
+        "2": 68,
+        "3": 66
+    },
+    "feature_shape": [
+        260,
+        51264
+    ],
+    "training_time": 13.686346,
+    "model_file": "../models/eeg_model_motor_imagery_left_right_20250315_103457.joblib"
+}
