@@ -36,15 +36,23 @@ def load_model(model_path=None):
     Returns:
         tuple: (pipeline, model_info)
     """
-    if model_path is None:
+    import glob
+    
+    if model_path is None or '*' in model_path:
         # Buscar el modelo más reciente
-        model_files = [f for f in os.listdir(MODELS_DIR) if f.endswith('.joblib')]
+        if model_path and '*' in model_path:
+            # Usar glob para expandir el comodín
+            model_files = glob.glob(model_path)
+        else:
+            # Buscar en el directorio de modelos
+            model_files = glob.glob(os.path.join(MODELS_DIR, '*.joblib'))
+            
         if not model_files:
             raise FileNotFoundError("No se encontraron modelos en el directorio de modelos")
         
         # Ordenar por fecha de modificación (más reciente primero)
-        model_files.sort(key=lambda x: os.path.getmtime(os.path.join(MODELS_DIR, x)), reverse=True)
-        model_path = os.path.join(MODELS_DIR, model_files[0])
+        model_files.sort(key=lambda x: os.path.getmtime(x), reverse=True)
+        model_path = model_files[0]
         
         # Buscar archivo de información correspondiente
         info_path = model_path.replace('.joblib', '_info.json')
