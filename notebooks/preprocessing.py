@@ -31,7 +31,7 @@ warnings.filterwarnings('ignore')
 
 # Parámetros de preprocesamiento mejorados
 PREPROCESSING_PARAMS = {
-    'low_cutoff': 4,       # Hz - Incluimos ondas theta (4-8 Hz)
+    'low_cutoff': 8,       # Hz - Incluimos ondas theta (4-8 Hz)
     'high_cutoff': 40,     # Hz - Incluimos hasta gama bajo (30-45 Hz)
     'apply_notch': True,   # Filtro notch para ruido de línea eléctrica
     'tmin': 0.0,           # Tiempo inicial para épocas (segundos) - Excluimos período pre-estímulo
@@ -359,7 +359,7 @@ def preprocess_data(raw_data, params=PREPROCESSING_PARAMS):
         event_id=new_event_id,
         tmin=params['tmin'],
         tmax=params['tmax'],
-        baseline=(None, 0) if params['baseline_correction'] else None,
+        baseline=(0, 0) if params['baseline_correction'] else None,  # Usar (0, 0) para evitar error
         preload=True
     )
     
@@ -616,34 +616,39 @@ def save_processed_data(eeg_data, base_filename='eeg_dataset'):
             y = y[non_rest_mask]
             logger.info(f"Filtradas muestras 'rest' para sujeto {subject}, run {run}. Quedan {X.shape[0]} muestras.")
         
+        # Verificar que hay muestras después del filtrado
+        if X.shape[0] == 0:
+            logger.warning(f"No quedan muestras para el sujeto {subject}, run {run} después de filtrar. Omitiendo.")
+            continue
+            
         # Agregar a las listas para los arrays principales
         n_samples = X.shape[0]
         
-        if n_samples > 0:  # Solo agregar si quedan muestras después del filtrado
-            all_X.append(X)
-            all_y.append(y)
-            all_subjects.extend([subject] * n_samples)
-            all_runs.extend([run] * n_samples)
-            
-            # Recopilar metadatos para este sujeto/run
-            subject_meta = {
-                'subject': subject,
-                'run': run,
-                'task_type': info['task_type'],
-                'paradigm': info['paradigm'],
-                'experiment_group': info.get('experiment_group', ''),
-                'num_samples': X.shape[0],
-                'num_features': X.shape[1],
-                'classes': list(info['event_id'].keys()),
-                'class_counts': {k: int(np.sum(y == v)) for k, v in info['event_id'].items() if v in y},
-                'sample_indices': {
-                    'start': len(all_subjects) - n_samples,
-                    'end': len(all_subjects)
-                },
-                'feature_type': info.get('feature_type', 'unknown')
-            }
-            
-            subjects_metadata.append(subject_meta)
+        # Solo agregar si quedan muestras después del filtrado
+        all_X.append(X)
+        all_y.append(y)
+        all_subjects.extend([subject] * n_samples)
+        all_runs.extend([run] * n_samples)
+        
+        # Recopilar metadatos para este sujeto/run
+        subject_meta = {
+            'subject': subject,
+            'run': run,
+            'task_type': info['task_type'],
+            'paradigm': info['paradigm'],
+            'experiment_group': info.get('experiment_group', ''),
+            'num_samples': X.shape[0],
+            'num_features': X.shape[1],
+            'classes': list(info['event_id'].keys()),
+            'class_counts': {k: int(np.sum(y == v)) for k, v in info['event_id'].items() if v in y},
+            'sample_indices': {
+                'start': len(all_subjects) - n_samples,
+                'end': len(all_subjects)
+            },
+            'feature_type': info.get('feature_type', 'unknown')
+        }
+        
+        subjects_metadata.append(subject_meta)
     
     # Verificar que hay datos para guardar
     if not all_X:
@@ -659,11 +664,22 @@ def save_processed_data(eeg_data, base_filename='eeg_dataset'):
     subjects_all = np.array(all_subjects)
     runs_all = np.array(all_runs)
     
-    # Guardar archivos de datos
-    np.save(os.path.join(dataset_dir, 'X_all.npy'), X_all)
-    np.save(os.path.join(dataset_dir, 'y_all.npy'), y_all)
-    np.save(os.path.join(dataset_dir, 'subjects_all.npy'), subjects_all)
-    np.save(os.path.join(dataset_dir, 'runs_all.npy'), runs_all)
+    # Verificar que los archivos se guardarán correctamente
+    logger.info(f"Guardando arrays con formas: X={X_all.shape}, y={y_all.shape}, subjects={subjects_all.shape}, runs={runs_all.shape}")
+    
+    # Guardar archivos de datos - usar try/except para detectar errores
+    try:
+        np.save(os.path.join(dataset_dir, 'X_all.npy'), X_all)
+        np.save(os.path.join(dataset_dir, 'y_all.npy'), y_all)
+        np.save(os.path.join(dataset_dir, 'subjects_all.npy'), subjects_all)
+        np.save(os.path.join(dataset_dir, 'runs_all.npy'), runs_all)
+        logger.info("Arrays guardados correctamente")
+    except Exception as e:
+        logger.error(f"Error al guardar los arrays: {str(e)}")
+        return {
+            'error': f'Error al guardar: {str(e)}',
+            'dataset_dir': dataset_dir
+        }
     
     # Crear configuración completa
     dataset_config = {
@@ -687,9 +703,30 @@ def save_processed_data(eeg_data, base_filename='eeg_dataset'):
     }
     
     # Guardar configuración como JSON (único archivo de metadatos)
-    metadata_file = os.path.join(dataset_dir, 'dataset_info.json')
-    with open(metadata_file, 'w') as f:
-        json.dump(dataset_config, f, indent=4)
+    try:
+        metadata_file = os.path.join(dataset_dir, 'dataset_info.json')
+        with open(metadata_file, 'w') as f:
+            json.dump(dataset_config, f, indent=4)
+        logger.info(f"Metadatos guardados en {metadata_file}")
+    except Exception as e:
+        logger.error(f"Error al guardar metadatos: {str(e)}")
+        return {
+            'error': f'Error al guardar metadatos: {str(e)}',
+            'dataset_dir': dataset_dir
+        }
+    
+    # Verificar que los archivos existen antes de retornar
+    expected_files = [
+        os.path.join(dataset_dir, 'X_all.npy'),
+        os.path.join(dataset_dir, 'y_all.npy'),
+        os.path.join(dataset_dir, 'subjects_all.npy'),
+        os.path.join(dataset_dir, 'runs_all.npy'),
+        os.path.join(dataset_dir, 'dataset_info.json')
+    ]
+    
+    for file_path in expected_files:
+        if not os.path.exists(file_path):
+            logger.error(f"El archivo {file_path} no existe después de guardar")
     
     logger.info(f"Datos y metadatos completos guardados en {dataset_dir}")
     

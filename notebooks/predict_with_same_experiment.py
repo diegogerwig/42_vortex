@@ -12,15 +12,20 @@ from sklearn.metrics import accuracy_score, f1_score, confusion_matrix, classifi
 
 # Importar funciones de los módulos
 from predict import load_model, load_specific_subject
-from preprocessing import preprocess_data
+from preprocessing import preprocess_data  # Esta función ha cambiado
 
 # Parámetros de preprocesamiento
 PREPROCESSING_PARAMS = {
     'low_cutoff': 8,      
     'high_cutoff': 40,    
     'apply_notch': True,  
-    'tmin': -1.0,         
-    'tmax': 4.0,          
+    'tmin': 0.0,         
+    'tmax': 4.0,
+    'baseline': (0, 0),
+    'baseline_correction': True,
+    'exclude_rest': True,
+    'downsample': True,           
+    'new_sfreq': 128         
 }
 
 # Configuración de los grupos de experimentos
@@ -164,16 +169,9 @@ def predict_with_same_experiment(num_subjects=6, model_path=None, save_results=T
             # Cargar datos del sujeto
             raw_data, task_type, paradigm = load_specific_subject(subject_id, run_id)
             
-            # Preprocesar datos
+            # Preprocesar datos - CAMBIO IMPORTANTE AQUÍ: pasar los PREPROCESSING_PARAMS en vez de argumentos separados
             print(f"  Preprocesando datos...")
-            X, y, epochs, event_id = preprocess_data(
-                raw_data,
-                PREPROCESSING_PARAMS['low_cutoff'],
-                PREPROCESSING_PARAMS['high_cutoff'],
-                PREPROCESSING_PARAMS['apply_notch'],
-                PREPROCESSING_PARAMS['tmin'],
-                PREPROCESSING_PARAMS['tmax']
-            )
+            X, y, epochs, event_id = preprocess_data(raw_data, PREPROCESSING_PARAMS)
             
             # Realizar predicción
             print(f"  Realizando predicción...")
@@ -225,7 +223,14 @@ def predict_with_same_experiment(num_subjects=6, model_path=None, save_results=T
             
         except Exception as e:
             print(f"  Error procesando sujeto {subject_id}: {str(e)}")
+            import traceback
+            traceback.print_exc()  # Mostrar más detalles sobre la excepción
             results[f'subject_{subject_id}'] = {'error': str(e)}
+    
+    # Verificar si hay datos de resumen
+    if not summary_data:
+        print("\nNo hay datos válidos para generar un resumen.")
+        return {'results': results, 'error': 'No hay datos válidos'}
     
     # Crear DataFrame de resumen
     summary_df = pd.DataFrame(summary_data)

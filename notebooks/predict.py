@@ -12,9 +12,6 @@ from mne.datasets import eegbci
 from mne.io import read_raw_edf
 from mne.viz import plot_raw
 
-# Importar funciones de preprocessing
-from preprocessing import preprocess_data
-
 # Configuración
 import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -138,6 +135,107 @@ def load_specific_subject(subject_id, run_id):
     
     return raw_data, task_type, paradigm
 
+# Versión simplificada de preprocess_data para ser compatible con la nueva versión
+def preprocess_data(raw_data, params=None):
+    """
+    Aplica preprocesamiento a los datos EEG crudos.
+    
+    Args:
+        raw_data (mne.io.Raw): Datos EEG crudos
+        params (dict): Parámetros de preprocesamiento
+        
+    Returns:
+        tuple: (X, y, epochs, event_id)
+    """
+    # Parámetros por defecto
+    default_params = {
+        'low_cutoff': 4,
+        'high_cutoff': 40,
+        'apply_notch': True,
+        'tmin': 0.0,
+        'tmax': 4.0,
+        'baseline': (0, 0),
+        'baseline_correction': True,
+        'exclude_rest': True
+    }
+    
+    # Usar parámetros proporcionados o por defecto
+    if params is None:
+        params = default_params
+    
+    # Crear copia para no modificar los datos originales
+    filter_data = raw_data.copy()
+    
+    # Aplicar filtro pasa banda
+    logger.info(f"Aplicando filtro pasa banda ({params['low_cutoff']}-{params['high_cutoff']} Hz)...")
+    filter_data.filter(params['low_cutoff'], params['high_cutoff'], fir_design='firwin')
+    
+    # Aplicar filtro notch si es necesario
+    if params['apply_notch']:
+        logger.info("Aplicando filtro notch a 60Hz...")
+        filter_data.notch_filter(freqs=[60], fir_design='firwin')
+    
+    # Extraer eventos de las anotaciones
+    events, event_id = mne.events_from_annotations(filter_data)
+    
+    # Mapear IDs de eventos a nombres más descriptivos
+    metadata = getattr(filter_data, 'metadata', {})
+    paradigm = metadata.get('paradigm', '')
+    
+    if paradigm == 'left_right_hand':
+        new_event_id = {
+            'rest': event_id.get('T0', 0),
+            'left_hand': event_id.get('T1', 0),
+            'right_hand': event_id.get('T2', 0)
+        }
+    else:  # hands_feet
+        new_event_id = {
+            'rest': event_id.get('T0', 0),
+            'both_hands': event_id.get('T1', 0),
+            'both_feet': event_id.get('T2', 0)
+        }
+    
+    # Eliminar eventos con valor 0 (no encontrados)
+    new_event_id = {k: v for k, v in new_event_id.items() if v != 0}
+    
+    logger.info(f"Mapeo de eventos: {new_event_id}")
+    
+    # Excluir eventos de descanso si está activado
+    if params.get('exclude_rest', True) and 'rest' in new_event_id:
+        logger.info("Excluyendo eventos de descanso (REST)...")
+        event_id_no_rest = {k: v for k, v in new_event_id.items() if k != 'rest'}
+        
+        # Verificar que quedan eventos después de excluir 'rest'
+        if not event_id_no_rest:
+            logger.warning("No quedan eventos después de excluir 'rest'. Se usarán todos los eventos.")
+        else:
+            new_event_id = event_id_no_rest
+    
+    # Crear épocas
+    epochs = mne.Epochs(
+        filter_data,
+        events,
+        event_id=new_event_id,
+        tmin=params['tmin'],
+        tmax=params['tmax'],
+        baseline=(0, 0) if params.get('baseline_correction', True) else None,
+        preload=True
+    )
+    
+    logger.info(f"Creadas {len(epochs)} épocas con {len(epochs.ch_names)} canales")
+    
+    # Extraer características para ML
+    X = epochs.get_data()  # Forma: (n_epochs, n_channels, n_times)
+    y = epochs.events[:, -1]  # Etiquetas
+    
+    # Reshape para ML (aplanar características)
+    n_epochs, n_channels, n_times = X.shape
+    X_flat = X.reshape(n_epochs, n_channels * n_times)
+    
+    logger.info(f"Datos extraídos: X shape {X_flat.shape}, y shape {y.shape}")
+    
+    return X_flat, y, epochs, new_event_id
+
 def predict_eeg(raw_data, pipeline, show_raw=False, preprocessing_params=None):
     """
     Realiza predicciones sobre datos EEG.
@@ -154,15 +252,55 @@ def predict_eeg(raw_data, pipeline, show_raw=False, preprocessing_params=None):
     if preprocessing_params is None:
         preprocessing_params = {
             'low_cutoff': 4,
-            'high_cutoff': 45,
+            'high_cutoff': 40,
             'apply_notch': True,
-            'tmin': -1.0,
-            'tmax': 4.0
+            'tmin': 0.0,
+            'tmax': 4.0,
+            'baseline': (0, 0),
+            'baseline_correction': True,
+            'exclude_rest': True
         }
     
     # Visualizar datos crudos si se solicita
     if show_raw:
         fig = plot_raw(raw_data, title='Datos EEG crudos', show=False)
+        plt.tight_layout()
+        plt.show()
+    
+    # Preprocesar datos
+    logger.info("Preprocesando datos...")
+    X, y, epochs, event_id = preprocess_data(raw_data, preprocessing_params)
+    
+    # Realizar predicción
+    logger.info("Realizando predicción...")
+    start_time = datetime.now()
+    y_pred = pipeline.predict(X)
+    predict_time = (datetime.now() - start_time).total_seconds()
+    
+    # Si existe ground truth, calcular métricas
+    if y is not None and len(y) > 0:
+        from sklearn.metrics import accuracy_score, f1_score, confusion_matrix, classification_report
+        accuracy = accuracy_score(y, y_pred)
+        f1 = f1_score(y, y_pred, average='weighted')
+        cm = confusion_matrix(y, y_pred)
+        
+        logger.info(f"Accuracy: {accuracy:.4f}, F1: {f1:.4f}")
+        logger.info(f"Tiempo de predicción: {predict_time:.4f} segundos")
+        
+        # Mapear IDs numéricos a nombres de clases
+        id_to_class = {v: k for k, v in event_id.items()}
+        class_names = [id_to_class.get(c, f"Clase {c}") for c in sorted(np.unique(y))]
+        
+        # Generar reporte
+        report = classification_report(y, y_pred, target_names=class_names, output_dict=True)
+        
+        # Visualizar matriz de confusión
+        plt.figure(figsize=(8, 6))
+        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=class_names, 
+                   yticklabels=class_names, cbar=False)
+        plt.title(f"Matriz de Confusión\nAccuracy: {accuracy:.3f}, F1: {f1:.3f}")
+        plt.ylabel('Clase real')
+        plt.xlabel('Clase predicha')
         plt.tight_layout()
         plt.show()
         
@@ -367,68 +505,3 @@ def batch_predict(pipeline, data_directory, subject_ids=None, runs=None):
         logger.info(f"Promedio para {task_type}: Accuracy = {avg_acc:.4f}, F1 = {avg_f1:.4f}")
     
     return results, summary
-
-if __name__ == "__main__":
-    # Este script no debería ejecutarse directamente
-    # sino importarse desde el notebook principal
-    print("Este script está diseñado para importarse, no para ejecutarse directamente.")
-    print("Ejemplo de uso en un notebook:")
-    print("from predict import load_model, load_specific_subject, predict_eeg")
-    print()
-    print("# Cargar modelo")
-    print("pipeline, model_info = load_model()")
-    print()
-    print("# Cargar datos de un sujeto específico")
-    print("raw_data, task_type, paradigm = load_specific_subject(1, 4)")
-    print()
-    print("# Realizar predicción")
-    print("results = predict_eeg(raw_data, pipeline, show_raw=True)")
-    print()
-    print("# Visualizar predicciones")
-    print("from predict import visualize_predictions_over_time")
-    print("visualize_predictions_over_time(results)")
-
-    
-    # Preprocesar datos
-    logger.info("Preprocesando datos...")
-    X, y, epochs, event_id = preprocess_data(
-        raw_data,
-        preprocessing_params['low_cutoff'],
-        preprocessing_params['high_cutoff'],
-        preprocessing_params['apply_notch'],
-        preprocessing_params['tmin'],
-        preprocessing_params['tmax']
-    )
-    
-    # Realizar predicción
-    logger.info("Realizando predicción...")
-    start_time = datetime.now()
-    y_pred = pipeline.predict(X)
-    predict_time = (datetime.now() - start_time).total_seconds()
-    
-    # Si existe ground truth, calcular métricas
-    if y is not None and len(y) > 0:
-        from sklearn.metrics import accuracy_score, f1_score, confusion_matrix, classification_report
-        accuracy = accuracy_score(y, y_pred)
-        f1 = f1_score(y, y_pred, average='weighted')
-        cm = confusion_matrix(y, y_pred)
-        
-        logger.info(f"Accuracy: {accuracy:.4f}, F1: {f1:.4f}")
-        logger.info(f"Tiempo de predicción: {predict_time:.4f} segundos")
-        
-        # Mapear IDs numéricos a nombres de clases
-        id_to_class = {v: k for k, v in event_id.items()}
-        class_names = [id_to_class.get(c, f"Clase {c}") for c in sorted(np.unique(y))]
-        
-        # Generar reporte
-        report = classification_report(y, y_pred, target_names=class_names, output_dict=True)
-        
-        # Visualizar matriz de confusión
-        plt.figure(figsize=(8, 6))
-        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=class_names, 
-                   yticklabels=class_names, cbar=False)
-        plt.title(f"Matriz de Confusión\nAccuracy: {accuracy:.3f}, F1: {f1:.3f}")
-        plt.ylabel('Clase real')
-        plt.xlabel('Clase predicha')
-        plt.tight_layout()
-        plt.show()
