@@ -5,11 +5,13 @@ pandas==2.2.3             # Data manipulation and analysis (DataFrames and Serie
 # 📊 Data Visualization
 matplotlib==3.9.4         # 2D plotting and visualization
 seaborn==0.13.2           # Statistical data visualization (built on Matplotlib)
+PyQt5==5.15.2			  # Python bindings for the Qt application framework
 
 # 🧠 Signal Processing & Neuroscience
 mne==1.9.0                # EEG/MEG signal processing and analysis (Magnetoencephalography and Electroencephalography)
-PyWavelets==1.8.0         # Wavelet Transforms in Python
 
 # 🤖 Machine Learning
 scikit-learn==1.4.0       # Machine learning algorithms and tools
 imbalanced-learn==0.12.0  # Class imbalance learning algorithms
+
+
