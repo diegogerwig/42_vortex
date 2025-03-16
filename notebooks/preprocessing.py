@@ -10,9 +10,17 @@ from datetime import datetime
 import mne
 from mne.datasets import eegbci
 from mne.io import read_raw_edf, concatenate_raws
+from mne.preprocessing import ICA
 
 # Procesamiento de señales
 from scipy import signal
+# Importar pywt solo si está disponible, de lo contrario usar alternativa
+try:
+    import pywt
+    WAVELET_AVAILABLE = True
+except ImportError:
+    WAVELET_AVAILABLE = False
+    print("PyWavelets no está instalado. Se usará procesamiento de señal alternativo.")
 
 # Configuración
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -21,14 +29,26 @@ logger = logging.getLogger('eeg_preprocessing')
 # Ignorar warnings
 warnings.filterwarnings('ignore')
 
-# Parámetros de preprocesamiento
+# Parámetros de preprocesamiento mejorados
 PREPROCESSING_PARAMS = {
-    'low_cutoff': 8,      # Hz - Incluimos ondas theta (4-8 Hz)
-    'high_cutoff': 40,    # Hz - Incluimos hasta gama bajo (30-45 Hz)
-    'apply_notch': True,  # Filtro notch para ruido de línea eléctrica
-    'tmin': -1.0,         # Tiempo inicial para épocas (segundos)
-    'tmax': 4.0,          # Tiempo final para épocas (segundos)
-    'csp_components': 6   # Componentes CSP a utilizar
+    'low_cutoff': 4,       # Hz - Incluimos ondas theta (4-8 Hz)
+    'high_cutoff': 40,     # Hz - Incluimos hasta gama bajo (30-45 Hz)
+    'apply_notch': True,   # Filtro notch para ruido de línea eléctrica
+    'tmin': 0.0,           # Tiempo inicial para épocas (segundos) - Excluimos período pre-estímulo
+    'tmax': 4.0,           # Tiempo final para épocas (segundos)
+    'csp_components': 6,   # Componentes CSP a utilizar
+    'apply_ica': True,     # Aplicar ICA para eliminar artefactos
+    'auto_reject_ica': True, # Rechazar automáticamente el primer componente ICA
+    'wavelet_decomp': WAVELET_AVAILABLE, # Aplicar descomposición wavelet solo si está disponible
+    'use_bandpower': not WAVELET_AVAILABLE, # Usar bandpower como alternativa si wavelet no está disponible
+    'wavelet_family': 'db4', # Familia wavelet (Daubechies 4)
+    'wavelet_level': 5,    # Nivel de descomposición wavelet
+    'exclude_rest': True,  # Excluir eventos de descanso (REST)
+    'apply_car': True,     # Aplicar referencia promedio común
+    'downsample': True,    # Reducir la tasa de muestreo
+    'new_sfreq': 128,      # Nueva frecuencia de muestreo (Hz)
+    'baseline_correction': True, # Corrección de línea base
+    'n_ica_components': 15  # Número de componentes ICA
 }
 
 # Definir los cuatro grupos de experimentos
@@ -123,28 +143,184 @@ def load_specific_subject(subject_id, run_id):
     
     return raw_data, subject_id, run_id, task_type, paradigm
 
-# Función para preprocesar datos
-def preprocess_data(raw_data, low_cutoff=4, high_cutoff=45, apply_notch=True, tmin=-1.0, tmax=4.0):
+# Función para extraer características por wavelet (si está disponible)
+def extract_wavelet_features(data, wavelet='db4', level=5):
     """
-    Aplica preprocesamiento a los datos EEG crudos.
+    Extrae características basadas en la transformada wavelet discreta.
+    
+    Args:
+        data (numpy.ndarray): Datos de señal (épocas x canales x tiempo)
+        wavelet (str): Familia wavelet a utilizar
+        level (int): Nivel de descomposición
+        
+    Returns:
+        numpy.ndarray: Características wavelet extraídas
+    """
+    if not WAVELET_AVAILABLE:
+        logger.warning("PyWavelets no está disponible. No se pueden extraer características wavelet.")
+        return None
+        
+    logger.info(f"Aplicando transformada wavelet ({wavelet}, nivel {level})...")
+    
+    n_epochs, n_channels, n_times = data.shape
+    features = []
+    
+    for epoch_idx in range(n_epochs):
+        epoch_features = []
+        
+        for channel_idx in range(n_channels):
+            # Obtener señal para este canal y época
+            signal = data[epoch_idx, channel_idx, :]
+            
+            # Aplicar descomposición wavelet
+            coeffs = pywt.wavedec(signal, wavelet, level=level)
+            
+            # Extraer estadísticas de cada nivel de coeficientes
+            channel_features = []
+            
+            for coef in coeffs:
+                # Calcular estadísticas para este nivel
+                channel_features.extend([
+                    np.mean(coef),        # Media
+                    np.std(coef),         # Desviación estándar
+                    np.max(coef),         # Máximo
+                    np.min(coef),         # Mínimo
+                    np.percentile(coef, 75) - np.percentile(coef, 25)  # Rango intercuartílico
+                ])
+            
+            epoch_features.extend(channel_features)
+        
+        features.append(epoch_features)
+    
+    return np.array(features)
+
+# Función alternativa para extraer características usando potencia en bandas de frecuencia
+def extract_bandpower_features(data, fs=128):
+    """
+    Extrae características basadas en la potencia en diferentes bandas de frecuencia.
+    Esta es una alternativa a wavelets cuando PyWavelets no está disponible.
+    
+    Args:
+        data (numpy.ndarray): Datos de señal (épocas x canales x tiempo)
+        fs (float): Frecuencia de muestreo en Hz
+        
+    Returns:
+        numpy.ndarray: Características de potencia en bandas extraídas
+    """
+    logger.info("Aplicando extracción de características basada en potencia en bandas...")
+    
+    # Definir bandas de frecuencia relevantes para BCI (Hz)
+    bands = {
+        'delta': (0.5, 4),
+        'theta': (4, 8),
+        'alpha': (8, 13),
+        'beta_low': (13, 20),
+        'beta_high': (20, 30),
+        'gamma': (30, 45)
+    }
+    
+    n_epochs, n_channels, n_times = data.shape
+    features = []
+    
+    for epoch_idx in range(n_epochs):
+        epoch_features = []
+        
+        for channel_idx in range(n_channels):
+            # Obtener señal para este canal y época
+            signal = data[epoch_idx, channel_idx, :]
+            
+            # Características en el dominio del tiempo
+            time_features = [
+                np.mean(signal),               # Media
+                np.std(signal),                # Desviación estándar
+                np.max(signal) - np.min(signal), # Rango
+                np.percentile(signal, 75) - np.percentile(signal, 25), # IQR
+                np.sum(np.abs(np.diff(signal))), # Movilidad (aproximación)
+                np.sqrt(np.var(np.diff(np.diff(signal))) / np.var(np.diff(signal))) # Complejidad (aproximación)
+            ]
+            
+            # Características en el dominio de la frecuencia
+            freqs, psd = signal.welch(signal, fs=fs, nperseg=min(256, len(signal)))
+            
+            # Extraer potencia en cada banda
+            band_features = []
+            for band_name, (low, high) in bands.items():
+                # Encontrar índices de frecuencia que caen en esta banda
+                idx_band = np.logical_and(freqs >= low, freqs <= high)
+                # Calcular potencia promedio en esta banda
+                band_power = np.mean(psd[idx_band]) if np.any(idx_band) else 0
+                # Normalizar dividiendo por la potencia total
+                total_power = np.sum(psd)
+                normalized_power = band_power / total_power if total_power > 0 else 0
+                
+                band_features.append(normalized_power)
+            
+            # Combinar características temporales y espectrales
+            epoch_features.extend(time_features + band_features)
+        
+        features.append(epoch_features)
+    
+    return np.array(features)
+
+# Función para preprocesar datos mejorada
+def preprocess_data(raw_data, params=PREPROCESSING_PARAMS):
+    """
+    Aplica preprocesamiento avanzado a los datos EEG crudos.
+    
+    Args:
+        raw_data (mne.io.Raw): Datos EEG crudos
+        params (dict): Parámetros de preprocesamiento
+        
+    Returns:
+        tuple: (X, y, epochs, event_id)
     """
     # Crear copia para no modificar los datos originales
-    filter_data = raw_data.copy()
+    proc_data = raw_data.copy()
+    
+    # Reducir la tasa de muestreo si está activado
+    if params['downsample']:
+        logger.info(f"Reduciendo frecuencia de muestreo a {params['new_sfreq']} Hz...")
+        proc_data.resample(params['new_sfreq'])
     
     # Aplicar filtro pasa banda
-    logger.info(f"Aplicando filtro pasa banda ({low_cutoff}-{high_cutoff} Hz)...")
-    filter_data.filter(low_cutoff, high_cutoff, fir_design='firwin')
+    logger.info(f"Aplicando filtro pasa banda ({params['low_cutoff']}-{params['high_cutoff']} Hz)...")
+    proc_data.filter(params['low_cutoff'], params['high_cutoff'], fir_design='firwin')
     
     # Aplicar filtro notch si es necesario
-    if apply_notch:
+    if params['apply_notch']:
         logger.info("Aplicando filtro notch a 60Hz...")
-        filter_data.notch_filter(freqs=[60], fir_design='firwin')
+        proc_data.notch_filter(freqs=[60], fir_design='firwin')
+    
+    # Aplicar referencia promedio común (CAR) si está activado
+    if params['apply_car']:
+        logger.info("Aplicando referencia promedio común (CAR)...")
+        proc_data.set_eeg_reference('average', projection=True)
+    
+    # Aplicar ICA para eliminar artefactos si está activado
+    if params['apply_ica']:
+        logger.info(f"Aplicando ICA con {params['n_ica_components']} componentes...")
+        
+        # Configurar ICA
+        ica = ICA(n_components=params['n_ica_components'], random_state=42, method='fastica')
+        
+        # Ajustar ICA a los datos
+        ica.fit(proc_data)
+        
+        # Excluir los primeros componentes (suelen estar relacionados con artefactos)
+        # Este es un enfoque simplificado ya que no hay canales EOG específicos
+        if params['auto_reject_ica']:
+            # Excluir el primer componente (típicamente artefactos de alta amplitud)
+            ica.exclude = [0]
+            logger.info(f"Excluyendo automáticamente el componente ICA 0")
+        
+        # Aplicar ICA para eliminar los componentes excluidos
+        ica.apply(proc_data)
     
     # Extraer eventos de las anotaciones
-    events, event_id = mne.events_from_annotations(filter_data)
+    events, event_id = mne.events_from_annotations(proc_data)
     
     # Mapear IDs de eventos a nombres más descriptivos
-    metadata = getattr(filter_data, 'metadata', {})
+    metadata = getattr(proc_data, 'metadata', {})
     paradigm = metadata.get('paradigm', '')
     
     if paradigm == 'left_right_hand':
@@ -165,33 +341,60 @@ def preprocess_data(raw_data, low_cutoff=4, high_cutoff=45, apply_notch=True, tm
     
     logger.info(f"Mapeo de eventos: {new_event_id}")
     
+    # Excluir eventos de descanso si está activado
+    if params['exclude_rest'] and 'rest' in new_event_id:
+        logger.info("Excluyendo eventos de descanso (REST)...")
+        event_id_no_rest = {k: v for k, v in new_event_id.items() if k != 'rest'}
+        
+        # Verificar que quedan eventos después de excluir 'rest'
+        if not event_id_no_rest:
+            logger.warning("No quedan eventos después de excluir 'rest'. Se usarán todos los eventos.")
+        else:
+            new_event_id = event_id_no_rest
+    
     # Crear épocas
     epochs = mne.Epochs(
-        filter_data,
+        proc_data,
         events,
         event_id=new_event_id,
-        tmin=tmin,
-        tmax=tmax,
-        baseline=(None, 0),
+        tmin=params['tmin'],
+        tmax=params['tmax'],
+        baseline=(None, 0) if params['baseline_correction'] else None,
         preload=True
     )
     
     logger.info(f"Creadas {len(epochs)} épocas con {len(epochs.ch_names)} canales")
     
-    # Extraer características para ML
-    X = epochs.get_data()  # Forma: (n_epochs, n_channels, n_times)
+    # Obtener datos de épocas
+    epoch_data = epochs.get_data()  # Forma: (n_epochs, n_channels, n_times)
     y = epochs.events[:, -1]  # Etiquetas
     
-    # Reshape para ML (aplanar características)
-    n_epochs, n_channels, n_times = X.shape
-    X_flat = X.reshape(n_epochs, n_channels * n_times)
+    # Extraer características según método seleccionado
+    if params['wavelet_decomp'] and WAVELET_AVAILABLE:
+        logger.info("Extrayendo características mediante descomposición wavelet...")
+        X = extract_wavelet_features(
+            epoch_data, 
+            wavelet=params['wavelet_family'], 
+            level=params['wavelet_level']
+        )
+    elif params['use_bandpower']:
+        logger.info("Extrayendo características mediante potencia en bandas de frecuencia...")
+        X = extract_bandpower_features(
+            epoch_data,
+            fs=proc_data.info['sfreq']
+        )
+    else:
+        # Si no se usa ningún método especial, aplanar características (enfoque original)
+        logger.info("Usando características crudas (aplanadas)...")
+        n_epochs, n_channels, n_times = epoch_data.shape
+        X = epoch_data.reshape(n_epochs, n_channels * n_times)
     
-    logger.info(f"Datos extraídos: X shape {X_flat.shape}, y shape {y.shape}")
+    logger.info(f"Características extraídas: X shape {X.shape}, y shape {y.shape}")
     
-    return X_flat, y, epochs, new_event_id
+    return X, y, epochs, new_event_id
 
 # Función para cargar múltiples sujetos con un grupo de experimento específico
-def load_subjects_for_experiment(num_subjects=10, experiment_group=None, random_seed=None):
+def load_subjects_for_experiment(num_subjects=10, experiment_group=None, random_seed=None, params=PREPROCESSING_PARAMS):
     """
     Carga datos EEG de múltiples sujetos para un grupo de experimento específico.
     
@@ -199,6 +402,7 @@ def load_subjects_for_experiment(num_subjects=10, experiment_group=None, random_
         num_subjects (int): Número de sujetos a cargar
         experiment_group (str): Grupo de experimento a utilizar, si es None se elige aleatoriamente
         random_seed (int): Semilla para reproducibilidad
+        params (dict): Parámetros de preprocesamiento
         
     Returns:
         list: Lista con información de EEG
@@ -245,15 +449,8 @@ def load_subjects_for_experiment(num_subjects=10, experiment_group=None, random_
                     # Cargar datos específicos
                     raw_data, subj_id, run_id, task_type, paradigm = load_specific_subject(subject, run)
                     
-                    # Preprocesar datos
-                    X, y, epochs, event_id = preprocess_data(
-                        raw_data, 
-                        PREPROCESSING_PARAMS['low_cutoff'],
-                        PREPROCESSING_PARAMS['high_cutoff'],
-                        PREPROCESSING_PARAMS['apply_notch'],
-                        PREPROCESSING_PARAMS['tmin'],
-                        PREPROCESSING_PARAMS['tmax']
-                    )
+                    # Preprocesar datos con los parámetros actualizados
+                    X, y, epochs, event_id = preprocess_data(raw_data, params)
                     
                     # Guardar información relevante
                     eeg_info = {
@@ -266,7 +463,8 @@ def load_subjects_for_experiment(num_subjects=10, experiment_group=None, random_
                         'epochs': epochs,
                         'event_id': event_id,
                         'class_counts': {k: np.sum(y == v) for k, v in event_id.items()},
-                        'experiment_group': experiment_group
+                        'experiment_group': experiment_group,
+                        'feature_type': 'wavelet' if params['wavelet_decomp'] else 'raw'
                     }
                     
                     eeg_data.append(eeg_info)
@@ -294,38 +492,6 @@ def load_subjects_for_experiment(num_subjects=10, experiment_group=None, random_
     
     print(f"\nCargados {len(eeg_data)} EEGs exitosamente de {len(selected_subjects)} sujetos.")
     return eeg_data
-
-# Función para guardar metadatos de los sujetos
-def save_metadata(eeg_data, filename='eeg_metadata.csv'):
-    """Guarda los metadatos de los sujetos en un archivo CSV en el directorio ../models"""
-    # Asegurar que el directorio ../models existe
-    models_dir = os.path.join('..', 'models')
-    if not os.path.exists(models_dir):
-        os.makedirs(models_dir)
-        logger.info(f"Directorio {models_dir} creado")
-    
-    # Construir la ruta completa del archivo
-    file_path = os.path.join(models_dir, filename)
-    
-    metadata = []
-    for info in eeg_data:
-        meta = {
-            'subject': info['subject'],
-            'run': info['run'],
-            'task_type': info['task_type'],
-            'paradigm': info['paradigm'],
-            'experiment_group': info.get('experiment_group', ''),
-            'num_samples': info['X'].shape[0],
-            'num_features': info['X'].shape[1],
-            'classes': ','.join(info['event_id'].keys()),
-            'class_distribution': str(info['class_counts'])
-        }
-        metadata.append(meta)
-    
-    df = pd.DataFrame(metadata)
-    df.to_csv(file_path, index=False)
-    logger.info(f"Metadatos guardados en {file_path}")
-    return df
 
 # Función para normalizar etiquetas entre diferentes paradigmas
 def normalize_labels(eeg_data):
@@ -363,7 +529,39 @@ def normalize_labels(eeg_data):
         
     return eeg_data
 
-# Función para guardar los datos procesados
+# Función para guardar metadatos de los sujetos
+def save_metadata(eeg_data, filename='eeg_metadata.csv'):
+    """Guarda los metadatos de los sujetos en un archivo CSV en el directorio ../models"""
+    # Asegurar que el directorio ../models existe
+    models_dir = os.path.join('..', 'models')
+    if not os.path.exists(models_dir):
+        os.makedirs(models_dir)
+        logger.info(f"Directorio {models_dir} creado")
+    
+    # Construir la ruta completa del archivo
+    file_path = os.path.join(models_dir, filename)
+    
+    metadata = []
+    for info in eeg_data:
+        meta = {
+            'subject': info['subject'],
+            'run': info['run'],
+            'task_type': info['task_type'],
+            'paradigm': info['paradigm'],
+            'experiment_group': info.get('experiment_group', ''),
+            'num_samples': info['X'].shape[0],
+            'num_features': info['X'].shape[1],
+            'classes': ','.join(info['event_id'].keys()),
+            'class_distribution': str(info['class_counts']),
+            'feature_type': info.get('feature_type', 'unknown')
+        }
+        metadata.append(meta)
+    
+    df = pd.DataFrame(metadata)
+    df.to_csv(file_path, index=False)
+    logger.info(f"Metadatos guardados en {file_path}")
+    return df
+
 # Función para guardar los datos procesados
 def save_processed_data(eeg_data, base_filename='eeg_dataset'):
     """
@@ -411,31 +609,49 @@ def save_processed_data(eeg_data, base_filename='eeg_dataset'):
         subject = info['subject']
         run = info['run']
         
+        # Filtrar para excluir las muestras de 'rest' si están presentes
+        if PREPROCESSING_PARAMS['exclude_rest'] and 1 in y:  # 1 = rest
+            non_rest_mask = y != 1
+            X = X[non_rest_mask]
+            y = y[non_rest_mask]
+            logger.info(f"Filtradas muestras 'rest' para sujeto {subject}, run {run}. Quedan {X.shape[0]} muestras.")
+        
         # Agregar a las listas para los arrays principales
         n_samples = X.shape[0]
-        all_X.append(X)
-        all_y.append(y)
-        all_subjects.extend([subject] * n_samples)
-        all_runs.extend([run] * n_samples)
         
-        # Recopilar metadatos para este sujeto/run
-        subject_meta = {
-            'subject': subject,
-            'run': run,
-            'task_type': info['task_type'],
-            'paradigm': info['paradigm'],
-            'experiment_group': info.get('experiment_group', ''),
-            'num_samples': X.shape[0],
-            'num_features': X.shape[1],
-            'classes': list(info['event_id'].keys()),
-            'class_counts': {k: int(np.sum(y == v)) for k, v in info['event_id'].items()},
-            'sample_indices': {
-                'start': len(all_subjects) - n_samples,
-                'end': len(all_subjects)
+        if n_samples > 0:  # Solo agregar si quedan muestras después del filtrado
+            all_X.append(X)
+            all_y.append(y)
+            all_subjects.extend([subject] * n_samples)
+            all_runs.extend([run] * n_samples)
+            
+            # Recopilar metadatos para este sujeto/run
+            subject_meta = {
+                'subject': subject,
+                'run': run,
+                'task_type': info['task_type'],
+                'paradigm': info['paradigm'],
+                'experiment_group': info.get('experiment_group', ''),
+                'num_samples': X.shape[0],
+                'num_features': X.shape[1],
+                'classes': list(info['event_id'].keys()),
+                'class_counts': {k: int(np.sum(y == v)) for k, v in info['event_id'].items() if v in y},
+                'sample_indices': {
+                    'start': len(all_subjects) - n_samples,
+                    'end': len(all_subjects)
+                },
+                'feature_type': info.get('feature_type', 'unknown')
             }
+            
+            subjects_metadata.append(subject_meta)
+    
+    # Verificar que hay datos para guardar
+    if not all_X:
+        logger.error("No hay datos para guardar después de filtrar.")
+        return {
+            'error': 'No data to save',
+            'dataset_dir': dataset_dir
         }
-        
-        subjects_metadata.append(subject_meta)
     
     # Concatenar todos los datos
     X_all = np.vstack(all_X)
@@ -459,10 +675,11 @@ def save_processed_data(eeg_data, base_filename='eeg_dataset'):
             'n_samples': X_all.shape[0],
             'n_features': X_all.shape[1],
             'class_distribution': {
-                'rest': int(np.sum(y_all == 1)),
+                # Excluimos 'rest' (clase 1) si está habilitado exclude_rest
                 'clase1': int(np.sum(y_all == 2)),
                 'clase2': int(np.sum(y_all == 3))
-            }
+            },
+            'feature_type': eeg_data[0].get('feature_type', 'unknown')
         },
         'preprocessing_params': PREPROCESSING_PARAMS,
         'subjects_data': subjects_metadata,

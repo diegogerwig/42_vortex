@@ -8,6 +8,7 @@ seaborn==0.13.2           # Statistical data visualization (built on Matplotlib)
 
 # 🧠 Signal Processing & Neuroscience
 mne==1.9.0                # EEG/MEG signal processing and analysis (Magnetoencephalography and Electroencephalography)
+PyWavelets==1.8.0         # Wavelet Transforms in Python
 
 # 🤖 Machine Learning
 scikit-learn==1.4.0       # Machine learning algorithms and tools
