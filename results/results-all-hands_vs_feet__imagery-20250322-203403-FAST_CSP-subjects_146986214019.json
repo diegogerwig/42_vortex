@@ -1,0 +1,156 @@
+{
+    "subjects_hash": "146986214019",
+    "config": {
+        "SUBJECTS": [
+            14,
+            69,
+            86,
+            21,
+            40,
+            19
+        ],
+        "MODE": "all",
+        "TRANSFORMER": "FAST_CSP",
+        "EXPERIMENT": "hands_vs_feet__imagery"
+    },
+    "events": [
+        "imagine/hands",
+        "imagine/feet"
+    ],
+    "subjects": [
+        {
+            "subject_id": 14,
+            "pipelines": [
+                [
+                    "LDA ",
+                    0.37777777777777777
+                ],
+                [
+                    "LOGR",
+                    0.4222222222222222
+                ],
+                [
+                    "RFC",
+                    0.4333333333333333
+                ]
+            ],
+            "cross_val_score": 0.4333333333333333,
+            "accuracy": 0.956,
+            "best_pipeline": "RFC",
+            "time_cost": 50.628589391708374
+        },
+        {
+            "subject_id": 69,
+            "pipelines": [
+                [
+                    "LDA ",
+                    0.6666666666666667
+                ],
+                [
+                    "LOGR",
+                    0.6444444444444445
+                ],
+                [
+                    "RFC",
+                    0.6777777777777778
+                ]
+            ],
+            "cross_val_score": 0.6777777777777778,
+            "accuracy": 0.911,
+            "best_pipeline": "RFC",
+            "time_cost": 50.56155967712402
+        },
+        {
+            "subject_id": 86,
+            "pipelines": [
+                [
+                    "LDA ",
+                    0.888888888888889
+                ],
+                [
+                    "LOGR",
+                    0.9666666666666666
+                ],
+                [
+                    "RFC",
+                    0.9555555555555555
+                ]
+            ],
+            "cross_val_score": 0.9666666666666666,
+            "accuracy": 0.956,
+            "best_pipeline": "LOGR",
+            "time_cost": 59.01116991043091
+        },
+        {
+            "subject_id": 21,
+            "pipelines": [
+                [
+                    "LDA ",
+                    0.4111111111111111
+                ],
+                [
+                    "LOGR",
+                    0.38888888888888895
+                ],
+                [
+                    "RFC",
+                    0.4
+                ]
+            ],
+            "cross_val_score": 0.4111111111111111,
+            "accuracy": 0.733,
+            "best_pipeline": "LDA ",
+            "time_cost": 57.86409568786621
+        },
+        {
+            "subject_id": 40,
+            "pipelines": [
+                [
+                    "LDA ",
+                    0.7777777777777778
+                ],
+                [
+                    "LOGR",
+                    0.7888888888888889
+                ],
+                [
+                    "RFC",
+                    0.711111111111111
+                ]
+            ],
+            "cross_val_score": 0.7888888888888889,
+            "accuracy": 1.0,
+            "best_pipeline": "LOGR",
+            "time_cost": 50.42217445373535
+        },
+        {
+            "subject_id": 19,
+            "pipelines": [
+                [
+                    "LDA ",
+                    0.5444444444444444
+                ],
+                [
+                    "LOGR",
+                    0.5222222222222223
+                ],
+                [
+                    "RFC",
+                    0.5555555555555556
+                ]
+            ],
+            "cross_val_score": 0.5555555555555556,
+            "accuracy": 0.933,
+            "best_pipeline": "RFC",
+            "time_cost": 53.10429549217224
+        }
+    ],
+    "time_unit": "seconds",
+    "total_subjects": 6,
+    "successful_subjects": 6,
+    "mean_cross_val_score": 0.639,
+    "std_cross_val_score": 0.197,
+    "mean_accuracy": 0.915,
+    "std_accuracy": 0.086,
+    "time_cost": 321.60040044784546
+}
