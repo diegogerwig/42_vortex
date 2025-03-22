@@ -1,0 +1,22 @@
+{
+    "accuracy": 0.8518518518518519,
+    "model_path": "../models/best_model.joblib",
+    "timestamp": "20250322_091535",
+    "class_names": [
+        0,
+        1
+    ],
+    "confusion_matrix": [
+        [
+            10,
+            3
+        ],
+        [
+            1,
+            13
+        ]
+    ],
+    "n_test_samples": 27,
+    "n_errors": 4,
+    "error_rate": 0.14814814814814814
+}
