@@ -1,0 +1,126 @@
+{
+    "subjects_hash": "97973168586",
+    "config": {
+        "SUBJECTS": [
+            97,
+            9,
+            73,
+            16,
+            85,
+            86
+        ],
+        "MODE": "all",
+        "TRANSFORMER": "CSP",
+        "EXPERIMENT": "hands_vs_feet__action"
+    },
+    "events": [
+        "do/hands",
+        "do/feet"
+    ],
+    "subjects": [
+        {
+            "subject_id": 97,
+            "pipelines": [],
+            "cv_scores": [
+                0.5,
+                0.42857142857142855,
+                0.5714285714285714,
+                0.7142857142857143,
+                0.7142857142857143
+            ],
+            "test_accuracy": 0.6666666666666666,
+            "mean_cv_score": 0.5857142857142857,
+            "best_pipeline": "RFC",
+            "train_score": 0.8611111111111112,
+            "time_cost": 50.72181034088135
+        },
+        {
+            "subject_id": 9,
+            "pipelines": [],
+            "cv_scores": [
+                0.875,
+                0.5714285714285714,
+                0.5714285714285714,
+                0.2857142857142857,
+                0.2857142857142857
+            ],
+            "test_accuracy": 0.5555555555555556,
+            "mean_cv_score": 0.5178571428571428,
+            "best_pipeline": "LDA",
+            "train_score": 0.7777777777777778,
+            "time_cost": 43.57022714614868
+        },
+        {
+            "subject_id": 73,
+            "pipelines": [],
+            "cv_scores": [
+                0.2857142857142857,
+                0.7142857142857143,
+                0.5714285714285714,
+                0.5,
+                0.5
+            ],
+            "test_accuracy": 0.4444444444444444,
+            "mean_cv_score": 0.5142857142857142,
+            "best_pipeline": "LOGR",
+            "train_score": 0.5151515151515151,
+            "time_cost": 47.43020963668823
+        },
+        {
+            "subject_id": 16,
+            "pipelines": [],
+            "cv_scores": [
+                0.875,
+                0.7142857142857143,
+                0.5714285714285714,
+                0.8571428571428571,
+                0.7142857142857143
+            ],
+            "test_accuracy": 0.8888888888888888,
+            "mean_cv_score": 0.7464285714285714,
+            "best_pipeline": "RFC",
+            "train_score": 0.9444444444444444,
+            "time_cost": 24.357616186141968
+        },
+        {
+            "subject_id": 85,
+            "pipelines": [],
+            "cv_scores": [
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "test_accuracy": 1.0,
+            "mean_cv_score": 1.0,
+            "best_pipeline": "LDA",
+            "train_score": 1.0,
+            "time_cost": 56.883015394210815
+        },
+        {
+            "subject_id": 86,
+            "pipelines": [],
+            "cv_scores": [
+                0.75,
+                0.5714285714285714,
+                0.14285714285714285,
+                0.7142857142857143,
+                0.8571428571428571
+            ],
+            "test_accuracy": 0.6666666666666666,
+            "mean_cv_score": 0.6071428571428571,
+            "best_pipeline": "RFC",
+            "train_score": 0.8888888888888888,
+            "time_cost": 47.598443269729614
+        }
+    ],
+    "time_unit": "seconds",
+    "total_subjects": 6,
+    "successful_subjects": 6,
+    "mean_cv_score": 0.662,
+    "std_cv_score": 0.17,
+    "mean_test_score": 0.704,
+    "std_test_score": 0.189,
+    "time_cost": 271.00439262390137
+}
