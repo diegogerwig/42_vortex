@@ -1,0 +1,125 @@
+{
+    "subjects_hash": "898086444142",
+    "config": {
+        "SUBJECTS": [
+            89,
+            80,
+            86,
+            44,
+            41,
+            42
+        ],
+        "TRANSFORMER": "CSP",
+        "EXPERIMENT": "imagery_vs_action__feets"
+    },
+    "events": [
+        "do/feet",
+        "imagine/feet"
+    ],
+    "subjects": [
+        {
+            "subject_id": 89,
+            "pipelines": [],
+            "cv_scores": [
+                1.0,
+                0.8571428571428571,
+                0.7142857142857143,
+                0.8571428571428571,
+                0.7142857142857143
+            ],
+            "test_accuracy": 0.7,
+            "mean_cv_score": 0.8285714285714286,
+            "best_pipeline": "RFC",
+            "train_score": 0.9444444444444444,
+            "time_cost": 30.807889699935913
+        },
+        {
+            "subject_id": 80,
+            "pipelines": [],
+            "cv_scores": [
+                0.75,
+                0.8571428571428571,
+                0.5714285714285714,
+                0.8571428571428571,
+                0.7142857142857143
+            ],
+            "test_accuracy": 0.4,
+            "mean_cv_score": 0.7500000000000001,
+            "best_pipeline": "LOGR",
+            "train_score": 0.8888888888888888,
+            "time_cost": 30.126665115356445
+        },
+        {
+            "subject_id": 86,
+            "pipelines": [],
+            "cv_scores": [
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                0.8571428571428571
+            ],
+            "test_accuracy": 0.7777777777777778,
+            "mean_cv_score": 0.9714285714285713,
+            "best_pipeline": "LDA",
+            "train_score": 0.9428571428571428,
+            "time_cost": 29.07350516319275
+        },
+        {
+            "subject_id": 44,
+            "pipelines": [],
+            "cv_scores": [
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                0.8571428571428571
+            ],
+            "test_accuracy": 1.0,
+            "mean_cv_score": 0.9714285714285713,
+            "best_pipeline": "LOGR",
+            "train_score": 0.9714285714285714,
+            "time_cost": 31.21670961380005
+        },
+        {
+            "subject_id": 41,
+            "pipelines": [],
+            "cv_scores": [
+                0.8571428571428571,
+                0.8571428571428571,
+                1.0,
+                0.8571428571428571,
+                1.0
+            ],
+            "test_accuracy": 0.7777777777777778,
+            "mean_cv_score": 0.9142857142857143,
+            "best_pipeline": "RFC",
+            "train_score": 1.0,
+            "time_cost": 28.264211416244507
+        },
+        {
+            "subject_id": 42,
+            "pipelines": [],
+            "cv_scores": [
+                0.75,
+                0.875,
+                0.8571428571428571,
+                0.8571428571428571,
+                1.0
+            ],
+            "test_accuracy": 1.0,
+            "mean_cv_score": 0.8678571428571429,
+            "best_pipeline": "LOGR",
+            "train_score": 0.8648648648648649,
+            "time_cost": 34.7331337928772
+        }
+    ],
+    "time_unit": "seconds",
+    "total_subjects": 6,
+    "successful_subjects": 6,
+    "mean_cv_score": 0.884,
+    "std_cv_score": 0.079,
+    "mean_test_score": 0.776,
+    "std_test_score": 0.203,
+    "time_cost": 184.7015631198883
+}
