@@ -1,23 +1,21 @@
-# 📌 Data Science & Data Analysis
-numpy==1.26.4             # Numerical computing and multi-dimensional arrays
-pandas==2.2.3             # Data manipulation and analysis (DataFrames and Series)
+# 📊 Data Analysis & Processing
+numpy==1.26.4             # Computación numérica y arrays multidimensionales
+pandas==2.2.3             # Manipulación y análisis de datos (DataFrames)
+scipy==1.12.0             # Algoritmos científicos y funciones matemáticas
 
-# 📊 Data Visualization
-matplotlib==3.9.4         # 2D plotting and visualization
-seaborn==0.13.2           # Statistical data visualization (built on Matplotlib)
-PyQt5==5.15.2			  # Python bindings for the Qt application framework
+# 📈 Data Visualization
+matplotlib==3.9.4         # Visualización y gráficos 2D
+seaborn==0.13.2           # Visualización estadística avanzada
+# PyQt5==5.15.2             # Framework para interfaces gráficas (backend para matplotlib)
 
-# 🧠 Signal Processing & Neuroscience
-mne==1.9.0                # EEG/MEG signal processing and analysis (Magnetoencephalography and Electroencephalography)
+# 🧠 Neurociencia & Procesamiento de Señales
+mne==1.9.0                # Procesamiento y análisis de señales EEG/MEG
 
 # 🤖 Machine Learning
-scikit-learn==1.4.0       # Machine learning algorithms and tools
-imbalanced-learn==0.12.0  # Class imbalance learning algorithms
+scikit-learn==1.4.0       # Algoritmos y herramientas de machine learning
+imbalanced-learn==0.12.0  # Manejo de datasets con clases desbalanceadas
+joblib==1.3.2             # Paralelización y persistencia (caching) para ML
 
-
-
-joblib
-scipy
-PyQt5
-pyyaml
-jupyter
+# 🛠️ Herramientas de Desarrollo
+jupyter==1.0.0            # Notebooks interactivos para desarrollo y visualización
+# pyyaml==6.0.1             # Procesamiento de archivos de configuración YAML
