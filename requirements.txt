@@ -6,7 +6,6 @@ scipy==1.12.0             # Algoritmos científicos y funciones matemáticas
 # 📈 Data Visualization
 matplotlib==3.9.4         # Visualización y gráficos 2D
 seaborn==0.13.2           # Visualización estadística avanzada
-# PyQt5==5.15.2             # Framework para interfaces gráficas (backend para matplotlib)
 
 # 🧠 Neurociencia & Procesamiento de Señales
 mne==1.9.0                # Procesamiento y análisis de señales EEG/MEG
@@ -18,4 +17,3 @@ joblib==1.3.2             # Paralelización y persistencia (caching) para ML
 
 # 🛠️ Herramientas de Desarrollo
 jupyter==1.0.0            # Notebooks interactivos para desarrollo y visualización
-# pyyaml==6.0.1             # Procesamiento de archivos de configuración YAML
